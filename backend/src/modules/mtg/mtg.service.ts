@@ -90,7 +90,7 @@ export class MtgService {
             throw new NotFoundException(`Error fetching card: ${cardName} on Scryfall!`);
         }
 
-        const cacheKey = `card:${name.toLowerCase().trim().replace(/\s+/g, "_")}`;
+        const cacheKey = `mtg:card:${name.toLowerCase().trim().replace(/\s+/g, "_")}`;
         const cachedCard = await this.cacheManager.get<CardResponseDto>(cacheKey);
         if (cachedCard) {
             console.log("Grabing card from cache...");
@@ -212,7 +212,7 @@ export class MtgService {
     }
 
     async getCardPriceFromStore(cardId: number, storeName: string): Promise<StoreCardDto[]> {
-        const cacheKey = `store:${storeName}:card_id:${cardId}`;
+        const cacheKey = `mtg:store:${storeName}:card_id:${cardId}`;
         const cachedPrices = await this.cacheManager.get<StoreCardDto[]>(cacheKey);
         if (cachedPrices) {
             console.log("Grabing card from cache...");

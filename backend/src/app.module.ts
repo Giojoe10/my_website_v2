@@ -4,6 +4,7 @@ import { Module } from "@nestjs/common";
 import { CacheableMemory } from "cacheable";
 import { AppController } from "./app.controller";
 import { MtgModule } from "./modules/mtg/mtg.module";
+import { PokemonModule } from "./modules/pokemon/pokemon.module";
 
 @Module({
     imports: [
@@ -21,6 +22,7 @@ import { MtgModule } from "./modules/mtg/mtg.module";
             isGlobal: true,
         }),
         MtgModule,
+        PokemonModule,
     ],
     controllers: [AppController],
     providers: [],
