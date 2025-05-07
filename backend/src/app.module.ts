@@ -3,6 +3,7 @@ import { CacheModule } from "@nestjs/cache-manager";
 import { Module } from "@nestjs/common";
 import { CacheableMemory } from "cacheable";
 import { AppController } from "./app.controller";
+import { ImageModule } from "./modules/image/image.module";
 import { MtgModule } from "./modules/mtg/mtg.module";
 import { PokemonModule } from "./modules/pokemon/pokemon.module";
 
@@ -23,6 +24,7 @@ import { PokemonModule } from "./modules/pokemon/pokemon.module";
         }),
         MtgModule,
         PokemonModule,
+        ImageModule,
     ],
     controllers: [AppController],
     providers: [],

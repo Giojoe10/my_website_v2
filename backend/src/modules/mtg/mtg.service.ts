@@ -4,9 +4,9 @@ import { Buffer } from "node:buffer";
 import { spawn } from "node:child_process";
 import { join } from "node:path";
 import PQueue from "p-queue";
+import { PythonResponseDto } from "../../common/dtos/python-response.dto";
 import { CardResponseDto } from "./dtos/card-response.dto";
 import { GenerateWantDto } from "./dtos/generate-want.dto";
-import { PythonResponseDto } from "./dtos/python-response.dto";
 import { StoreCardDto } from "./dtos/store-card.dto";
 
 type CardJson = {
