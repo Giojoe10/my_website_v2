@@ -16,7 +16,7 @@ class PokeapiPokemon {
 class PokeapiMove {
     name: string;
     type: { name: string };
-    // biome-ignore lint/style/useNamingConvention: <explanation>
+    // biome-ignore lint/style/useNamingConvention: using pokeapi's standard
     damage_class: { name: string };
     generation: { name: string };
 }

@@ -1,7 +1,9 @@
 import { Keyv, createKeyv } from "@keyv/redis";
 import { CacheModule } from "@nestjs/cache-manager";
 import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
 import { CacheableMemory } from "cacheable";
+import { DataSource } from "typeorm";
 import { AppController } from "./app.controller";
 import { ImageModule } from "./modules/image/image.module";
 import { MtgModule } from "./modules/mtg/mtg.module";
@@ -22,6 +24,12 @@ import { PokemonModule } from "./modules/pokemon/pokemon.module";
             },
             isGlobal: true,
         }),
+        TypeOrmModule.forRoot({
+            type: "sqlite",
+            database: "giojoe.db",
+            autoLoadEntities: true,
+            synchronize: true,
+        }),
         MtgModule,
         PokemonModule,
         ImageModule,
@@ -29,4 +37,6 @@ import { PokemonModule } from "./modules/pokemon/pokemon.module";
     controllers: [AppController],
     providers: [],
 })
-export class AppModule {}
+export class AppModule {
+    constructor(private dataSource: DataSource) {}
+}

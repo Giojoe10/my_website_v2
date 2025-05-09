@@ -16,6 +16,7 @@ async function bootstrap() {
             "The MtgController provides endpoints for interacting with Magic: The Gathering card data, including generating card list images, retrieving card details, and fetching pricing information from external sources.\n\nNames and images are retrieved from `Scryfall` while prices and ids are retrieved from `LigaMagic`",
         )
         .addTag("Pokémon")
+        .addTag("Pokémon | Team")
         .addTag("Image Manipulation")
         .build();
 

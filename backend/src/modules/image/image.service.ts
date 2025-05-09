@@ -1,11 +1,15 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { spawn } from "node:child_process";
 import { join } from "node:path";
 import { PythonResponseDto } from "src/common/dtos/python-response.dto";
+import { validateUrl } from "src/common/utils/validateUrl";
 
 @Injectable()
 export class ImageService {
     async trimImage(imageUrl: string): Promise<Buffer> {
+        if (!validateUrl(imageUrl)) {
+            throw new BadRequestException("URL not valid!");
+        }
         const base64Image = await this.imageUrlToBase64(imageUrl);
         const scriptPath = join(__dirname, "..", "..", "..", "scripts", "trim_image.py");
 
