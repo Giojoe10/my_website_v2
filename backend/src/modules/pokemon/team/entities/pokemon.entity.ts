@@ -29,6 +29,9 @@ export class Pokemon {
     @Column({ type: "boolean", nullable: false, default: false })
     shiny: boolean;
 
+    @Column({ type: "varchar", nullable: false, default: "pokeball" })
+    ball: string;
+
     @Column({ type: "varchar", nullable: false })
     type1?: string;
 

@@ -1,9 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Res } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiProduces, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
 import { CardResponseDto } from "./dtos/card-response.dto";
+import { CreateMtgDeckDto } from "./dtos/create-mtg-deck.dto";
 import { GenerateWantDto } from "./dtos/generate-want.dto";
 import { StoreCardDto } from "./dtos/store-card.dto";
+import { UpdateMtgDeckDto } from "./dtos/update-mtg-deck.dto";
+import { MtgDeck } from "./entities/mtg-deck.entity";
 import { MtgService } from "./mtg.service";
 
 @ApiTags("Magic: The Gathering")
@@ -183,5 +186,124 @@ export class MtgController {
     ) {
         const card = await this.getCard(cardName);
         return this.mtgService.getBestDealFromStore(card.cardId, storeName, quantity);
+    }
+
+    @ApiOperation({
+        summary: "Get all decks",
+        description: "Returns a list of all decks in the database.",
+        tags: ["Magic: The Gathering | Decks"],
+    })
+    @ApiResponse({
+        status: 200,
+        description: "Data for decks retrieved successfuly",
+        type: [MtgDeck],
+        example: [
+            {
+                id: 1,
+                name: "Breya, Etherium Shaper",
+                archidektUrl: "https://archidekt.com/decks/6656210",
+                ligamagicUrl: "https://www.ligamagic.com.br/?view=dks/deck&id=7273952",
+                coverCard: "/deckImage/b3f8898f-1943-4151-8742-942fe20425d8.png",
+            },
+        ],
+    })
+    @Get("deck")
+    async getAllDecks() {
+        return await this.mtgService.getAllDecks();
+    }
+
+    @ApiOperation({
+        summary: "Get deck",
+        description: "Retrieves the details of a specific deck based on the provided ID.",
+        tags: ["Magic: The Gathering | Decks"],
+    })
+    @ApiResponse({
+        status: 200,
+        description: "Data the deck retrieved successfuly",
+        type: MtgDeck,
+        example: {
+            id: 1,
+            name: "Breya, Etherium Shaper",
+            archidektUrl: "https://archidekt.com/decks/6656210",
+            ligamagicUrl: "https://www.ligamagic.com.br/?view=dks/deck&id=7273952",
+            coverCard: "/deckImage/b3f8898f-1943-4151-8742-942fe20425d8.png",
+        },
+    })
+    @ApiResponse({
+        status: 404,
+        description: "Deck not found!",
+    })
+    @Get("deck/:idDeck")
+    async getDeckById(@Param("idDeck") idDeck: number) {
+        return await this.mtgService.getDeckById(+idDeck);
+    }
+
+    @ApiOperation({
+        summary: "Create deck",
+        description: "Creates a new deck using the data provided in the request body.",
+        tags: ["Magic: The Gathering | Decks"],
+    })
+    @ApiResponse({
+        status: 200,
+        description: "Deck created succesfully",
+        type: MtgDeck,
+        example: {
+            id: 1,
+            name: "Breya, Etherium Shaper",
+            archidektUrl: "https://archidekt.com/decks/6656210",
+            ligamagicUrl: "https://www.ligamagic.com.br/?view=dks/deck&id=7273952",
+            coverCard: "/deckImage/b3f8898f-1943-4151-8742-942fe20425d8.png",
+        },
+    })
+    @HttpCode(200)
+    @Post("deck")
+    async createDeck(@Body() createMtgDeckDto: CreateMtgDeckDto) {
+        return await this.mtgService.createDeck(createMtgDeckDto);
+    }
+
+    @ApiOperation({
+        summary: "Update deck",
+        description:
+            "Updates an existing deck with the given ID using the provided data. If updating the cover image, deletes the previous image to save the new one.",
+        tags: ["Magic: The Gathering | Decks"],
+    })
+    @ApiResponse({
+        status: 200,
+        description: "Deck updated succesfully",
+        type: MtgDeck,
+        example: {
+            id: 1,
+            name: "Breya, Etherium Shaper",
+            archidektUrl: "https://archidekt.com/decks/6656210",
+            ligamagicUrl: "https://www.ligamagic.com.br/?view=dks/deck&id=7273952",
+            coverCard: "/deckImage/b3f8898f-1943-4151-8742-942fe20425d8.png",
+        },
+    })
+    @ApiResponse({
+        status: 404,
+        description: "Deck not found!",
+    })
+    @Patch("deck/:idDeck")
+    async updateDeck(@Param("idDeck") idDeck: number, @Body() updateMtgDeckDto: UpdateMtgDeckDto) {
+        return await this.mtgService.updateDeck(+idDeck, updateMtgDeckDto);
+    }
+
+    @ApiOperation({
+        summary: "Delete deck",
+        description:
+            "Deletes a deck from the datebase using the specified ID. Also deletes the deck's cover image from the filesystem.",
+        tags: ["Magic: The Gathering | Decks"],
+    })
+    @ApiResponse({
+        status: 200,
+        description: "Deck deleted succesfully",
+    })
+    @ApiResponse({
+        status: 404,
+        description: "Deck not found!",
+    })
+    @Delete("deck/:idDeck")
+    async deleteDeck(@Param("idDeck") idDeck: number) {
+        return await this.mtgService.deleteDeck(+idDeck);
     }
 }

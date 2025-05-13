@@ -1,11 +1,18 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { spawn } from "node:child_process";
-import { join } from "node:path";
+import { createWriteStream, existsSync, mkdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { extname, join, resolve } from "node:path";
+import { Readable, pipeline } from "node:stream";
+import { promisify } from "node:util";
 import { PythonResponseDto } from "src/common/dtos/python-response.dto";
 import { validateUrl } from "src/common/utils/validateUrl";
+import { v4 as uuid } from "uuid";
+const streamPipeline = promisify(pipeline);
 
 @Injectable()
 export class ImageService {
+    private readonly uploadDir = resolve(process.cwd(), "public");
+
     async trimImage(imageUrl: string): Promise<Buffer> {
         if (!validateUrl(imageUrl)) {
             throw new BadRequestException("URL not valid!");
@@ -53,5 +60,51 @@ export class ImageService {
         const base64 = Buffer.from(arrayBuffer).toString("base64");
 
         return base64;
+    }
+
+    async saveImage(imageUrl: string, path: string, trim = false): Promise<string> {
+        if (!validateUrl(imageUrl)) {
+            throw new BadRequestException("URL not valid!");
+        }
+        const ext = extname(imageUrl).split("?")[0] || ".jpg";
+        const filename = `${uuid()}${ext}`;
+        const targetDir = join(this.uploadDir, path || "");
+        const filePath = join(targetDir, filename);
+        console.log(filePath);
+
+        if (!existsSync(targetDir)) {
+            console.log("Path does not exist");
+            mkdirSync(targetDir, { recursive: true });
+        }
+        if (trim === true) {
+            console.log("Trimming...");
+            const trimmedBuffer = await this.trimImage(imageUrl);
+            writeFileSync(filePath, trimmedBuffer);
+        } else {
+            const response = await fetch(imageUrl);
+            if (!response.ok || !response.body) {
+                throw new BadRequestException("Error downloading image");
+            }
+
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            const readableStream = Readable.fromWeb(response.body as any);
+            await streamPipeline(readableStream, createWriteStream(filePath));
+        }
+
+        return `/${path ? `${path}/` : ""}${filename}`;
+    }
+
+    async deleteImage(imageName: string, path = ""): Promise<void> {
+        const filePath = join(this.uploadDir, path, imageName);
+
+        if (!existsSync(filePath)) {
+            throw new NotFoundException("Image not found.");
+        }
+
+        try {
+            unlinkSync(filePath);
+        } catch (err) {
+            throw new InternalServerErrorException("Error during image deletion.");
+        }
     }
 }

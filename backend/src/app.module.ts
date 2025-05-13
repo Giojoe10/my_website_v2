@@ -1,8 +1,10 @@
 import { Keyv, createKeyv } from "@keyv/redis";
 import { CacheModule } from "@nestjs/cache-manager";
 import { Module } from "@nestjs/common";
+import { ServeStaticModule } from "@nestjs/serve-static";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CacheableMemory } from "cacheable";
+import { join } from "node:path";
 import { DataSource } from "typeorm";
 import { AppController } from "./app.controller";
 import { ImageModule } from "./modules/image/image.module";
@@ -29,6 +31,9 @@ import { PokemonModule } from "./modules/pokemon/pokemon.module";
             database: "giojoe.db",
             autoLoadEntities: true,
             synchronize: true,
+        }),
+        ServeStaticModule.forRoot({
+            rootPath: join(__dirname, "..", "public"),
         }),
         MtgModule,
         PokemonModule,

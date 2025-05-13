@@ -1,13 +1,19 @@
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
 import { HttpException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 import { Buffer } from "node:buffer";
 import { spawn } from "node:child_process";
 import { join } from "node:path";
 import PQueue from "p-queue";
+import { Repository } from "typeorm";
 import { PythonResponseDto } from "../../common/dtos/python-response.dto";
+import { ImageService } from "../image/image.service";
 import { CardResponseDto } from "./dtos/card-response.dto";
+import { CreateMtgDeckDto } from "./dtos/create-mtg-deck.dto";
 import { GenerateWantDto } from "./dtos/generate-want.dto";
 import { StoreCardDto } from "./dtos/store-card.dto";
+import { UpdateMtgDeckDto } from "./dtos/update-mtg-deck.dto";
+import { MtgDeck } from "./entities/mtg-deck.entity";
 
 type CardJson = {
     id: number;
@@ -37,7 +43,13 @@ const queue = new PQueue({
 
 @Injectable()
 export class MtgService {
-    constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+    constructor(
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
+        @InjectRepository(MtgDeck)
+        private mtgDeckRepository: Repository<MtgDeck>,
+
+        private readonly imageService: ImageService,
+    ) {}
 
     async generateWant(cards: GenerateWantDto): Promise<Buffer> {
         const scriptPath = join(__dirname, "..", "..", "..", "scripts", "generate_want_image.py");
@@ -265,5 +277,55 @@ export class MtgService {
         }
 
         return result;
+    }
+
+    async getAllDecks(): Promise<MtgDeck[]> {
+        return await this.mtgDeckRepository.find();
+    }
+
+    async getDeckById(idDeck: number): Promise<MtgDeck> {
+        const deck = await this.mtgDeckRepository.findOneBy({ id: idDeck });
+        if (!deck) {
+            throw new NotFoundException("Deck not found");
+        }
+        return deck;
+    }
+
+    async createDeck(createMtgDeckDto: CreateMtgDeckDto) {
+        let coverCard = "";
+        if (createMtgDeckDto.coverImageUrl) {
+            coverCard = await this.imageService.saveImage(createMtgDeckDto.coverImageUrl, "deckImage");
+        } else {
+            const parsedCardName = encodeURIComponent(createMtgDeckDto.name).replaceAll(/\=/g, ":");
+            const scryfallUrl = `https://api.scryfall.com/cards/named?fuzzy=${parsedCardName}`;
+            const response = await fetch(scryfallUrl);
+            if (!response.ok) {
+                throw new NotFoundException(`Error fetching card: ${response.statusText}`);
+            }
+            const data = await response.json();
+            const imageUrl = data.card_faces ? data.card_faces[0].image_uris.large : data.image_uris.large;
+            coverCard = await this.imageService.saveImage(imageUrl, "deckImage");
+        }
+        const newDeck = this.mtgDeckRepository.create({ ...createMtgDeckDto, coverCard });
+        const deck = await this.mtgDeckRepository.save(newDeck);
+        return deck;
+    }
+
+    async updateDeck(idDeck: number, updateMtgDeckDto: UpdateMtgDeckDto) {
+        const deck = await this.getDeckById(idDeck);
+
+        if (updateMtgDeckDto.coverImageUrl) {
+            await this.imageService.deleteImage(deck.coverCard.split("/").pop(), "deckImage");
+            const newCoverImage = await this.imageService.saveImage(updateMtgDeckDto.coverImageUrl, "deckImage");
+            deck.coverCard = newCoverImage;
+        }
+        Object.assign(deck, { ...updateMtgDeckDto, coverImageUrl: undefined });
+        return await this.mtgDeckRepository.save(deck);
+    }
+
+    async deleteDeck(idDeck: number) {
+        const deck = await this.getDeckById(idDeck);
+        await this.imageService.deleteImage(deck.coverCard.split("/").pop(), "deckImage");
+        await this.mtgDeckRepository.remove(deck);
     }
 }
