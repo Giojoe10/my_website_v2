@@ -1,6 +1,6 @@
-/** @type {import('next').NextConfig} */
+import type { NextConfig } from "next";
 
-const nextConfig: import("next").NextConfig = {
+const nextConfig: NextConfig = {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     webpack: (config: { watchOptions: { poll: number; aggregateTimeout: number } }, { dev }: any) => {
         if (dev) {
@@ -11,6 +11,9 @@ const nextConfig: import("next").NextConfig = {
             };
         }
         return config;
+    },
+    images: {
+        remotePatterns: [new URL("http://localhost:5000/**")],
     },
 };
 
