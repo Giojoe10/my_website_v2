@@ -16,4 +16,7 @@ export class MtgDeck {
 
     @Column({ type: "varchar", nullable: false })
     coverCard: string;
+
+    @Column({ type: "int", nullable: false })
+    order: number;
 }

@@ -306,13 +306,21 @@ export class MtgService {
             const imageUrl = data.card_faces ? data.card_faces[0].image_uris.large : data.image_uris.large;
             coverCard = await this.imageService.saveImage(imageUrl, "deckImage");
         }
-        const newDeck = this.mtgDeckRepository.create({ ...createMtgDeckDto, coverCard });
+
+        const maxOrder = await this.mtgDeckRepository
+            .createQueryBuilder("deck")
+            .select("MAX(deck.order)", "max")
+            .getRawOne();
+        const order = (maxOrder.max ?? 0) + 1;
+
+        const newDeck = this.mtgDeckRepository.create({ ...createMtgDeckDto, coverCard, order });
         const deck = await this.mtgDeckRepository.save(newDeck);
         return deck;
     }
 
     async updateDeck(idDeck: number, updateMtgDeckDto: UpdateMtgDeckDto) {
         const deck = await this.getDeckById(idDeck);
+        console.log(updateMtgDeckDto);
 
         if (updateMtgDeckDto.coverImageUrl) {
             await this.imageService.deleteImage(deck.coverCard.split("/").pop(), "deckImage");
