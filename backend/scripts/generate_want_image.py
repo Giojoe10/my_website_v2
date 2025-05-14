@@ -102,7 +102,7 @@ def generate_want_image(card_list: list[Card], l: int = 5, card_size: tuple[int,
                 stroke_fill='black'
             )
 
-        if card['price']:
+        if 'price' in card:
             price_tag = f"R$ {card['price']}".replace(".", ",")
 
             text_width = draw.textlength(price_tag, font=FONT_SMALL)
