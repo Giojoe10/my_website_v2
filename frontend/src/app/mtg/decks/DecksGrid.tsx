@@ -1,0 +1,22 @@
+import { Deck } from "@/actions/deck";
+import DeckCard from "@/app/components/DeckCard";
+
+export default async function DecksGrid({ decks }: { decks: Deck[] }) {
+    console.log(decks);
+    return (
+        <div className="flex justify-center gap-4 py-4 px-16 flex-row flex-wrap">
+            {decks
+                .sort((a, b) => a.order - b.order)
+                .map((deck: Deck) => (
+                    <DeckCard
+                        key={deck.id}
+                        id={deck.id}
+                        deckName={deck.name}
+                        archidektPage={deck.archidektUrl}
+                        ligamagicPage={deck.ligamagicUrl}
+                        cardImage={deck.coverCard}
+                    />
+                ))}
+        </div>
+    );
+}
