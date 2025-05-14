@@ -9,6 +9,7 @@ import { PokemonService } from "./pokemon.service";
 export class PokemonController {
     constructor(private readonly pokemonService: PokemonService) {}
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Retrieve pokémon data",
         description:
@@ -36,11 +37,13 @@ export class PokemonController {
         status: 500,
         description: "Error retrieving or processing Pokémon data",
     })
+    //#endregion
     @Get(":pokemonName")
     getPokemonData(@Param("pokemonName") pokemonName: string) {
         return this.pokemonService.getPokemonData(pokemonName);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Retrieve move data",
         description:
@@ -70,6 +73,7 @@ export class PokemonController {
         status: 500,
         description: "Error retrieving or processing move data",
     })
+    //#endregion
     @Get("move/:moveName")
     getMoveData(@Param("moveName") moveName: string) {
         return this.pokemonService.getMoveData(moveName);

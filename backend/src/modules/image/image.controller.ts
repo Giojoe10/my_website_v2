@@ -8,6 +8,7 @@ import { ImageService } from "./image.service";
 export class ImageController {
     constructor(private readonly imageService: ImageService) {}
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Save image",
         description:
@@ -24,11 +25,13 @@ export class ImageController {
     @ApiResponse({ status: 201, description: "Image saved successfuly", type: String })
     @ApiResponse({ status: 400, description: "Invalid image URL" })
     @ApiResponse({ status: 500, description: "Error processing the image" })
+    //#endregion
     @Post()
     async saveImage(@Query("imageUrl") imageUrl: string, @Query("trim") trim: boolean, @Query("path") path?: string) {
         return await this.imageService.saveImage(imageUrl, path, trim);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Delete image",
         description: "This endpoint receives the name of an image and then deletes it from the filesystem.",
@@ -38,11 +41,13 @@ export class ImageController {
     @ApiResponse({ status: 200, description: "Image deleted successfuly" })
     @ApiResponse({ status: 404, description: "Image not found with this name and/or path" })
     @ApiResponse({ status: 500, description: "Error during image deletion." })
+    //#endregion
     @Delete()
     async deleteImage(@Query("imageName") imageName: string, @Query("path") path?: string) {
         await this.imageService.deleteImage(imageName, path);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Trim image",
         description:
@@ -64,6 +69,7 @@ export class ImageController {
     @ApiResponse({ status: 400, description: "Invalid image URL or failed script execution" })
     @ApiResponse({ status: 500, description: "Error processing the image or interpreting the script response" })
     @HttpCode(200)
+    //#endregion
     @Post("trim")
     async trimImage(@Query("imageUrl") imageUrl: string, @Res({ passthrough: true }) res: Response) {
         const imageBuffer = await this.imageService.trimImage(imageUrl);

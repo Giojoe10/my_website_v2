@@ -14,6 +14,7 @@ import { MtgService } from "./mtg.service";
 export class MtgController {
     constructor(private readonly mtgService: MtgService) {}
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Generate card list image",
         description:
@@ -32,6 +33,7 @@ export class MtgController {
             },
         },
     })
+    //#endregion
     @Post("want")
     async generateWant(@Body() cards: GenerateWantDto, @Res({ passthrough: true }) res: Response) {
         const imageBuffer = await this.mtgService.generateWant(cards);
@@ -39,6 +41,7 @@ export class MtgController {
         res.send(imageBuffer);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Retrieve card data",
         description:
@@ -67,11 +70,13 @@ export class MtgController {
         required: true,
         description: "Name of the Magic: The Gathering card to search for (fuzzy match supported)",
     })
+    //#endregion
     @Get("card/:cardName")
     getCard(@Param("cardName") cardName: string) {
         return this.mtgService.getCard(cardName);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Retrieve multiple card data",
         description:
@@ -101,11 +106,13 @@ export class MtgController {
         status: 429,
         description: "LigaMagic's Cloudflare blocked the API",
     })
+    //#endregion
     @Get("cards")
     getCards(@Query("cardNames") cardNames: string[]) {
         return this.mtgService.getCards(cardNames);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: " Retrieve card price from store",
         description:
@@ -136,12 +143,14 @@ export class MtgController {
             },
         ],
     })
+    //#endregion
     @Get("card/:cardName/store/:storeName")
     async getCardPriceFromStore(@Param("cardName") cardName: string, @Param("storeName") storeName: string) {
         const card = await this.getCard(cardName);
         return this.mtgService.getCardPriceFromStore(card.cardId, storeName);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Retrieve best deal for card amount from store",
         description:
@@ -178,6 +187,7 @@ export class MtgController {
             },
         ],
     })
+    //#endregion
     @Get("buy/:cardName/store/:storeName")
     async getBestDealFromStore(
         @Param("cardName") cardName: string,
@@ -188,6 +198,7 @@ export class MtgController {
         return this.mtgService.getBestDealFromStore(card.cardId, storeName, quantity);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Get all decks",
         description: "Returns a list of all decks in the database.",
@@ -207,11 +218,13 @@ export class MtgController {
             },
         ],
     })
+    //#endregion
     @Get("deck")
     async getAllDecks() {
         return await this.mtgService.getAllDecks();
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Get deck",
         description: "Retrieves the details of a specific deck based on the provided ID.",
@@ -233,11 +246,13 @@ export class MtgController {
         status: 404,
         description: "Deck not found!",
     })
+    //#endregion
     @Get("deck/:idDeck")
     async getDeckById(@Param("idDeck") idDeck: number) {
         return await this.mtgService.getDeckById(+idDeck);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Create deck",
         description: "Creates a new deck using the data provided in the request body.",
@@ -256,11 +271,13 @@ export class MtgController {
         },
     })
     @HttpCode(200)
+    //#endregion
     @Post("deck")
     async createDeck(@Body() createMtgDeckDto: CreateMtgDeckDto) {
         return await this.mtgService.createDeck(createMtgDeckDto);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Update deck",
         description:
@@ -283,11 +300,13 @@ export class MtgController {
         status: 404,
         description: "Deck not found!",
     })
+    //#endregion
     @Patch("deck/:idDeck")
     async updateDeck(@Param("idDeck") idDeck: number, @Body() updateMtgDeckDto: UpdateMtgDeckDto) {
         return await this.mtgService.updateDeck(+idDeck, updateMtgDeckDto);
     }
 
+    //#region @Decorators
     @ApiOperation({
         summary: "Delete deck",
         description:
@@ -302,6 +321,7 @@ export class MtgController {
         status: 404,
         description: "Deck not found!",
     })
+    //#endregion
     @Delete("deck/:idDeck")
     async deleteDeck(@Param("idDeck") idDeck: number) {
         return await this.mtgService.deleteDeck(+idDeck);
