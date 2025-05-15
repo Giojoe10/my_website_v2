@@ -13,10 +13,11 @@ export default function PageTitle({ image, title }: PageTitleProps): JSX.Element
                 fill
                 src={image}
                 alt={title}
+                priority
                 className="absolute w-full -z-10 group-hover:scale-105 group-hover:blur-[1px] transition-all duration-1000"
             />
-            <h1 className="absolute text-center tracking-wide text-6xl text-black font-semibold blur-lg">{title}</h1>
-            <h1 className="text-center tracking-wide text-6xl text-white font-semibold z-10">{title}</h1>
+            <p className="absolute text-center tracking-wide text-6xl text-black font-semibold blur-lg">{title}</p>
+            <p className="text-center tracking-wide text-6xl text-white font-semibold z-10">{title}</p>
         </div>
     );
 }
