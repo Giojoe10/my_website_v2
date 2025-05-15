@@ -51,13 +51,13 @@ export class MtgService {
         private readonly imageService: ImageService,
     ) {}
 
-    async generateWant(cards: GenerateWantDto): Promise<Buffer> {
+    async generateWant(generateWantDto: GenerateWantDto): Promise<Buffer> {
         const scriptPath = join(__dirname, "..", "..", "..", "scripts", "generate_want_image.py");
 
         const pythonResponse = await new Promise<PythonResponseDto>((resolve, reject) => {
             const python = spawn("py", [scriptPath]);
 
-            python.stdin.write(JSON.stringify(cards));
+            python.stdin.write(JSON.stringify(generateWantDto));
             python.stdin.end();
 
             let data = "";
