@@ -58,7 +58,7 @@ def get_card_image(card_name: str, size: Tuple[int, int]) -> Image.Image:
         raise RuntimeError(f"Erro ao obter imagem da carta '{card_name}': {e}")
     
 
-def generate_want_image(card_list: list[Card], l: int = 5, card_size: tuple[int, int] = (745, 1040), ratio: float = 0.25):
+def generate_want_image(card_list: list[Card], l: int = 5, card_size: tuple[int, int] = (745, 1040), ratio: float = 0.25, showQuantity: bool = True):
     card_size = ( int(card_size[0] * ratio), int(card_size[1] * ratio) )
     ASSETS_PATH = os.path.join(__file__, "..", "..", "assets")
     FOIL_OVERLAY_PATH = os.path.join(ASSETS_PATH, "foil.png")
@@ -87,7 +87,7 @@ def generate_want_image(card_list: list[Card], l: int = 5, card_size: tuple[int,
         if card.get('foil', False):
             im.paste(FOIL_OVERLAY, card_position, mask=FOIL_OVERLAY)
         
-        if card.get('quantity'):
+        if card.get('quantity') and showQuantity:
             text_width = draw.textlength(str(card['quantity']), font=FONT)
             text_height = FONT.size
 
@@ -143,8 +143,9 @@ def main():
     l = json_input.get('columns', 5)
     card_size = tuple(json_input.get('cardSize', [745, 1040]))
     ratio = json_input.get('ratio', 0.25)
+    showQuantity = json_input.get('showQuantity', True)
 
-    return_image = generate_want_image(card_list, l, card_size, ratio)
+    return_image = generate_want_image(card_list, l, card_size, ratio, showQuantity)
 
     print(json.dumps({
         "image": return_image

@@ -3,6 +3,7 @@ import { Type } from "class-transformer";
 import {
     ArrayNotEmpty,
     IsArray,
+    IsBoolean,
     IsInt,
     IsNumber,
     IsOptional,
@@ -63,4 +64,12 @@ export class GenerateWantDto {
     @Max(2, { message: "Ratio must not exceed 2." })
     @IsOptional()
     ratio?: number;
+
+    @ApiProperty({
+        description: "Whether to show the quantity in front of the cards or not",
+        default: true,
+    })
+    @IsBoolean()
+    @IsOptional()
+    showQuantity?: boolean;
 }
