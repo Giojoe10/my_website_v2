@@ -11,7 +11,7 @@ type SearchParamProps = {
     searchParams: Promise<Record<string, string>> | null | undefined;
 };
 
-export default async function Mtg({ searchParams }: SearchParamProps) {
+export default async function Decks({ searchParams }: SearchParamProps) {
     const awaitedSearchParams = await searchParams;
     const addDeck = awaitedSearchParams?.addDeck;
     const editing = awaitedSearchParams?.editing;
