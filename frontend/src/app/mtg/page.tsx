@@ -4,7 +4,7 @@ import PageTitle from "../components/PageTitle";
 export default function Mtg() {
     return (
         <div>
-            <PageTitle image="/images/banners/ashling-wide.png" title="MTG" />
+            <PageTitle image="/images/banners/ashling-wide.png" title="Magic: The Gathering" />
             <div className="flex justify-center gap-4 p-4">
                 <PageCard
                     name="Busca de Preços"
