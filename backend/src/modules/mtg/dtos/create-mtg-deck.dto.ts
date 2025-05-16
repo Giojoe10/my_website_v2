@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsUrl } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUrl } from "class-validator";
 
 export class CreateMtgDeckDto {
     @IsString()
@@ -19,4 +19,7 @@ export class CreateMtgDeckDto {
     @IsUrl()
     @IsOptional()
     coverImageUrl?: string;
+
+    @IsBoolean()
+    completed: boolean;
 }

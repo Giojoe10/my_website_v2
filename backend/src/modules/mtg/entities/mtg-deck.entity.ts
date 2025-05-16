@@ -19,4 +19,7 @@ export class MtgDeck {
 
     @Column({ type: "int", nullable: false })
     order: number;
+
+    @Column({ type: "boolean", nullable: false, default: true })
+    completed: boolean;
 }
