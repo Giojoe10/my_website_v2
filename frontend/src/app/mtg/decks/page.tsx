@@ -1,3 +1,4 @@
+import { getAllDecks } from "@/actions/deck";
 import DeckForm from "@/app/components/forms/DeckForm";
 import OrderDecksForm from "@/app/components/forms/OrderDecksForm";
 import DeckCardSkeleton from "@/app/components/skeletons/DeckCardSkeleton";
@@ -17,8 +18,9 @@ export default async function Decks({ searchParams }: SearchParamProps) {
     const editing = awaitedSearchParams?.editing;
     const orderDecks = awaitedSearchParams?.orderDecks;
 
-    const data = await fetch("http://localhost:5000/mtg/deck", { cache: "no-store" });
-    const decks = await data.json();
+    // const data = await fetch("http://localhost:5000/mtg/deck", { cache: "no-store" });
+    // const decks = await data.json();
+    const decks = await getAllDecks();
 
     return (
         <div>

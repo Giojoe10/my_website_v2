@@ -10,11 +10,19 @@ export interface Deck {
     ligamagicUrl: string;
     coverCard: string;
     order: number;
+    price?: number;
 }
 
 export async function getAllDecks(): Promise<Deck[]> {
     const response = await fetch("http://localhost:5000/mtg/deck");
-    return await response.json();
+    const decks: Deck[] = await response.json();
+    for (const deck of decks) {
+        console.log("fetching price for deck ", deck);
+        const deckPriceResponse = await fetch(`http://localhost:5000/mtg/deck/price/${deck.id}`);
+        const deckPrice = await deckPriceResponse.json();
+        deck.price = deckPrice.price;
+    }
+    return decks;
 }
 
 export async function getDeckById(idDeck: number): Promise<Deck> {
