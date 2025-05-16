@@ -9,12 +9,14 @@ import PQueue from "p-queue";
 import { Repository } from "typeorm";
 import { PythonResponseDto } from "../../common/dtos/python-response.dto";
 import { ImageService } from "../image/image.service";
+import { ArchidektDataDto } from "./dtos/archidekt-data.dto";
 import { CardResponseDto } from "./dtos/card-response.dto";
 import { CreateMtgDeckDto } from "./dtos/create-mtg-deck.dto";
 import { DeckPriceResponse } from "./dtos/deck-price-response.dto";
 import { GenerateWantDto } from "./dtos/generate-want.dto";
 import { StoreCardDto } from "./dtos/store-card.dto";
 import { UpdateMtgDeckDto } from "./dtos/update-mtg-deck.dto";
+import { WantCardDto } from "./dtos/want-card.dto";
 import { MtgDeck } from "./entities/mtg-deck.entity";
 
 type CardJson = {
@@ -339,7 +341,7 @@ export class MtgService {
         await this.mtgDeckRepository.remove(deck);
     }
 
-    async getDeckPrice(idDeck: number): Promise<DeckPriceResponse | null> {
+    async getDeckPrice(idDeck: number): Promise<DeckPriceResponse> {
         const cacheKey = `mtg:deck:${idDeck}`;
         const cachedPrice = await this.cacheManager.get<DeckPriceResponse>(cacheKey);
         if (cachedPrice) {
@@ -382,6 +384,71 @@ export class MtgService {
         };
 
         await this.cacheManager.set(cacheKey, result, 1000 * 60 * 60 * 6);
+
+        return result;
+    }
+
+    async getDeckArchidektData(idDeck: number): Promise<ArchidektDataDto> {
+        const deck = await this.mtgDeckRepository.findOneBy({ id: idDeck });
+        if (!deck) {
+            throw new NotFoundException("Deck not found");
+        }
+        if (!deck.archidektUrl) {
+            throw new UnprocessableEntityException("Deck found, but is missing the ligamagic url");
+        }
+
+        let { archidektUrl } = deck;
+        const url = new URL(archidektUrl);
+        url.pathname = url.pathname.replace(/^\/decks\//, "api/decks/");
+        archidektUrl = `${url.toString()}/`;
+
+        const response = await fetch(archidektUrl);
+        const { cards } = await response.json();
+        const result: ArchidektDataDto = {
+            have: [],
+            haveQuantity: 0,
+            getting: [],
+            gettingQuantity: 0,
+            dontHave: [],
+            dontHaveQuantity: 0,
+        };
+
+        for (const card of cards) {
+            const { label } = card;
+            const labelName = label.split(",")[0];
+            if (!labelName) {
+                continue;
+            }
+            if (card.card.oracleCard.superTypes?.includes("Basic")) {
+                continue;
+            }
+            if (card.categories.includes("Sideboard") || card.categories.includes("Maybeboard")) {
+                continue;
+            }
+
+            const cardData: WantCardDto = {
+                name: card.card.oracleCard.name,
+                quantity: card.quantity,
+                foil: false,
+            };
+
+            switch (labelName) {
+                case "Have":
+                    result.have.push(cardData);
+                    result.haveQuantity += cardData.quantity;
+                    break;
+                case "Getting":
+                    result.getting.push(cardData);
+                    result.gettingQuantity += cardData.quantity;
+                    break;
+                case "Don't Have":
+                    result.dontHave.push(cardData);
+                    result.dontHaveQuantity += cardData.quantity;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         return result;
     }

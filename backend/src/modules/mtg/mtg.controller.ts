@@ -366,4 +366,43 @@ export class MtgController {
     async getDeckPrice(@Param("idDeck", ParseIntPipe) idDeck: number) {
         return await this.mtgService.getDeckPrice(+idDeck);
     }
+
+    //#region @Decorators
+    @ApiOperation({
+        summary: "Get archidekt data",
+        description: "Retrieves the data of a specific deck based on the provided ID from archidekt.",
+        tags: ["Magic: The Gathering | Decks"],
+    })
+    @ApiParam({
+        name: "idDeck",
+        type: Number,
+        description: "Database id of the deck to search the price for",
+        required: true,
+    })
+    @ApiResponse({
+        status: 200,
+        description: "Archidekt data retrieved successfuly",
+        type: DeckPriceResponse,
+        example: {
+            id: 7273952,
+            price: 1427.31,
+        },
+    })
+    @ApiResponse({
+        status: 400,
+        description: "Please provide the deck id!",
+    })
+    @ApiResponse({
+        status: 404,
+        description: "Deck not found!",
+    })
+    @ApiResponse({
+        status: 422,
+        description: "Deck found, but is missing the archidekt url!",
+    })
+    //#endregion
+    @Get("deck/archidekt/:idDeck")
+    async getDeckArchidektData(@Param("idDeck", ParseIntPipe) idDeck: number) {
+        return await this.mtgService.getDeckArchidektData(+idDeck);
+    }
 }
