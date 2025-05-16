@@ -60,6 +60,11 @@ export default async function DeckForm({ editing }: { editing?: number }) {
                             placeholder="Link para a imagem de capa do deck"
                         />
                     </div>
+                    <div className="flex flex-row gap-8">
+                        <label htmlFor="completed">Deck Completo?</label>
+                        <input type="checkbox" defaultChecked className="accent-primary" />
+                    </div>
+
                     <div className="justify-center gap-4 flex mt-3">
                         <SaveButton />
                         <Link

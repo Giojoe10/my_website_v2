@@ -15,6 +15,7 @@ export default async function DecksGrid({ decks }: { decks: Deck[] }) {
                         ligamagicPage={deck.ligamagicUrl}
                         cardImage={deck.coverCard}
                         deckPrice={deck.price}
+                        completed={deck.completed}
                     />
                 ))}
         </div>

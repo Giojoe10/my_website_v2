@@ -11,6 +11,7 @@ export interface Deck {
     coverCard: string;
     order: number;
     price?: number;
+    completed: boolean;
 }
 
 export async function getAllDecks(): Promise<Deck[]> {
@@ -39,6 +40,7 @@ export async function createDeck(data: FormData): Promise<void> {
             archidektUrl: data.get("archidektUrl") || null,
             ligamagicUrl: data.get("ligamagicUrl") || null,
             coverImageUrl: data.get("coverImageUrl") || null,
+            completed: data.get("completed") === "on",
         }),
     });
 
