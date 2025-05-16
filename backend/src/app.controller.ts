@@ -1,4 +1,4 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Redirect } from "@nestjs/common";
 import { ApiExcludeController } from "@nestjs/swagger";
 
 @Controller()
@@ -8,4 +8,8 @@ export class AppController {
     getHealth(): string {
         return "OK";
     }
+
+    @Get()
+    @Redirect("/docs", 302)
+    redirectToDocs() {}
 }
