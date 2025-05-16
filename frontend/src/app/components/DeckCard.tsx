@@ -1,3 +1,4 @@
+import { ArchidektData } from "@/actions/deck";
 import Image from "next/image";
 import Link from "next/link";
 import { JSX } from "react";
@@ -11,6 +12,7 @@ interface DeckCardProps {
     ligamagicPage: string;
     deckPrice?: number;
     completed: boolean;
+    archidekt?: ArchidektData;
 }
 
 export default async function DeckCard({
@@ -21,6 +23,7 @@ export default async function DeckCard({
     ligamagicPage,
     deckPrice,
     completed,
+    archidekt,
 }: DeckCardProps): Promise<JSX.Element> {
     return (
         <div className="inline-flex justify-center relative h-fit">
@@ -57,7 +60,12 @@ export default async function DeckCard({
                         R$ {deckPrice?.toFixed(2).replace(".", ",") || "???"}
                     </p>
                 ) : (
-                    <p className="text-secondary-300 text-xs mb-2 cursor-default">0/100</p>
+                    archidekt && (
+                        <p className="text-secondary-300 text-xs mb-2 cursor-default">
+                            {archidekt.haveQuantity + archidekt.gettingQuantity}/
+                            {archidekt.haveQuantity + archidekt.gettingQuantity + archidekt.dontHaveQuantity}
+                        </p>
+                    )
                 )}
                 <div className="w-full h-fit flex flex-col justify-center gap-1">
                     <Link href={archidektPage || "/"} className="w-full" target="_blank" rel="noopener noreferrer">

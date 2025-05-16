@@ -1,6 +1,6 @@
 "use server";
 
-interface Card {
+export interface Card {
     name: string;
     quantity: number;
     foil: boolean;

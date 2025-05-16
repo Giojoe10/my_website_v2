@@ -2,6 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { Card } from "./want";
+
+export interface ArchidektData {
+    have: Card[];
+    haveQuantity: number;
+    getting: Card[];
+    gettingQuantity: number;
+    dontHave: Card[];
+    dontHaveQuantity: number;
+}
 
 export interface Deck {
     id: number;
@@ -12,16 +22,25 @@ export interface Deck {
     order: number;
     price?: number;
     completed: boolean;
+    archidekt?: ArchidektData;
 }
 
 export async function getAllDecks(): Promise<Deck[]> {
     const response = await fetch("http://localhost:5000/mtg/deck");
     const decks: Deck[] = await response.json();
     for (const deck of decks) {
-        console.log("fetching price for deck ", deck);
-        const deckPriceResponse = await fetch(`http://localhost:5000/mtg/deck/price/${deck.id}`);
-        const deckPrice = await deckPriceResponse.json();
-        deck.price = deckPrice.price;
+        if (deck.completed) {
+            console.log("fetching price for deck ", deck.name);
+            const deckPriceResponse = await fetch(`http://localhost:5000/mtg/deck/price/${deck.id}`);
+            const deckPrice = await deckPriceResponse.json();
+            deck.price = deckPrice.price;
+        } else {
+            console.log("fetching archidekt data for deck ", deck.name);
+            const deckArchidektResponse = await fetch(`http://localhost:5000/mtg/deck/archidekt/${deck.id}`);
+            const deckArchidektData = await deckArchidektResponse.json();
+            console.log(deckArchidektData);
+            deck.archidekt = deckArchidektData;
+        }
     }
     return decks;
 }
