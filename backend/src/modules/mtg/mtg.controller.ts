@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, Res } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiProduces, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
 import { CardResponseDto } from "./dtos/card-response.dto";
 import { CreateMtgDeckDto } from "./dtos/create-mtg-deck.dto";
+import { DeckPriceResponse } from "./dtos/deck-price-response.dto";
 import { GenerateWantDto } from "./dtos/generate-want.dto";
 import { StoreCardDto } from "./dtos/store-card.dto";
 import { UpdateMtgDeckDto } from "./dtos/update-mtg-deck.dto";
@@ -192,7 +193,7 @@ export class MtgController {
     async getBestDealFromStore(
         @Param("cardName") cardName: string,
         @Param("storeName") storeName: string,
-        @Query("quantity") quantity: number,
+        @Query("quantity", ParseIntPipe) quantity: number,
     ) {
         const card = await this.getCard(cardName);
         return this.mtgService.getBestDealFromStore(card.cardId, storeName, quantity);
@@ -232,7 +233,7 @@ export class MtgController {
     })
     @ApiResponse({
         status: 200,
-        description: "Data the deck retrieved successfuly",
+        description: "Deck data retrieved successfuly",
         type: MtgDeck,
         example: {
             id: 1,
@@ -248,7 +249,7 @@ export class MtgController {
     })
     //#endregion
     @Get("deck/:idDeck")
-    async getDeckById(@Param("idDeck") idDeck: number) {
+    async getDeckById(@Param("idDeck", ParseIntPipe) idDeck: number) {
         return await this.mtgService.getDeckById(+idDeck);
     }
 
@@ -302,7 +303,7 @@ export class MtgController {
     })
     //#endregion
     @Patch("deck/:idDeck")
-    async updateDeck(@Param("idDeck") idDeck: number, @Body() updateMtgDeckDto: UpdateMtgDeckDto) {
+    async updateDeck(@Param("idDeck", ParseIntPipe) idDeck: number, @Body() updateMtgDeckDto: UpdateMtgDeckDto) {
         return await this.mtgService.updateDeck(+idDeck, updateMtgDeckDto);
     }
 
@@ -323,7 +324,46 @@ export class MtgController {
     })
     //#endregion
     @Delete("deck/:idDeck")
-    async deleteDeck(@Param("idDeck") idDeck: number) {
+    async deleteDeck(@Param("idDeck", ParseIntPipe) idDeck: number) {
         return await this.mtgService.deleteDeck(+idDeck);
+    }
+
+    //#region @Decorators
+    @ApiOperation({
+        summary: "Get deck price",
+        description: "Retrieves the price of a specific deck based on the provided ID.",
+        tags: ["Magic: The Gathering | Decks"],
+    })
+    @ApiParam({
+        name: "idDeck",
+        type: Number,
+        description: "Database id of the deck to search the price for",
+        required: true,
+    })
+    @ApiResponse({
+        status: 200,
+        description: "Deck price retrieved successfuly",
+        type: DeckPriceResponse,
+        example: {
+            id: 7273952,
+            price: 1427.31,
+        },
+    })
+    @ApiResponse({
+        status: 400,
+        description: "Please provide the deck id!",
+    })
+    @ApiResponse({
+        status: 404,
+        description: "Deck not found!",
+    })
+    @ApiResponse({
+        status: 422,
+        description: "Deck found, but is missing the ligamagic url!",
+    })
+    //#endregion
+    @Get("deck/price/:idDeck")
+    async getDeckPrice(@Param("idDeck", ParseIntPipe) idDeck: number) {
+        return await this.mtgService.getDeckPrice(+idDeck);
     }
 }

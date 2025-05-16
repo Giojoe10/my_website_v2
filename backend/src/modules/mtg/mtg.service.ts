@@ -1,6 +1,7 @@
 import { CACHE_MANAGER, Cache } from "@nestjs/cache-manager";
-import { HttpException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { HttpException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { JSDOM } from "jsdom";
 import { Buffer } from "node:buffer";
 import { spawn } from "node:child_process";
 import { join } from "node:path";
@@ -10,6 +11,7 @@ import { PythonResponseDto } from "../../common/dtos/python-response.dto";
 import { ImageService } from "../image/image.service";
 import { CardResponseDto } from "./dtos/card-response.dto";
 import { CreateMtgDeckDto } from "./dtos/create-mtg-deck.dto";
+import { DeckPriceResponse } from "./dtos/deck-price-response.dto";
 import { GenerateWantDto } from "./dtos/generate-want.dto";
 import { StoreCardDto } from "./dtos/store-card.dto";
 import { UpdateMtgDeckDto } from "./dtos/update-mtg-deck.dto";
@@ -335,5 +337,52 @@ export class MtgService {
         const deck = await this.getDeckById(idDeck);
         await this.imageService.deleteImage(deck.coverCard.split("/").pop(), "deckImage");
         await this.mtgDeckRepository.remove(deck);
+    }
+
+    async getDeckPrice(idDeck: number): Promise<DeckPriceResponse | null> {
+        const cacheKey = `mtg:deck:${idDeck}`;
+        const cachedPrice = await this.cacheManager.get<DeckPriceResponse>(cacheKey);
+        if (cachedPrice) {
+            console.log("Grabing deck from cache...");
+            return cachedPrice;
+        }
+
+        const deck = await this.mtgDeckRepository.findOneBy({ id: idDeck });
+        if (!deck) {
+            throw new NotFoundException("Deck not found");
+        }
+        if (!deck.ligamagicUrl) {
+            throw new UnprocessableEntityException("Deck found, but is missing the ligamagic url");
+        }
+
+        const { ligamagicUrl } = deck;
+        const url = new URL(ligamagicUrl);
+        const ligamagicId = url.searchParams.get("id");
+
+        const ligamagicResponse = (await queue.add(() => {
+            return fetch(ligamagicUrl);
+        })) as Response;
+
+        if (!ligamagicResponse.ok) {
+            if (ligamagicResponse.status === 429) {
+                throw new HttpException("Ligamagic Cloudflare rate limit achieved", 429);
+            }
+            throw new NotFoundException(`Error fetching card details from Ligamagic: ${ligamagicResponse.statusText}`);
+        }
+
+        const ligamagicPage = await ligamagicResponse.text();
+        const dom = new JSDOM(ligamagicPage);
+        const document = dom.window.document;
+        const div = document.getElementById(`prices-2-${ligamagicId}`);
+        const priceString = div.innerHTML;
+        const price = Number.parseFloat(priceString.split(" ")[1].replace(".", "").replace(",", "."));
+        const result = {
+            ligamagicId,
+            price,
+        };
+
+        await this.cacheManager.set(cacheKey, result, 1000 * 60 * 60 * 6);
+
+        return result;
     }
 }
