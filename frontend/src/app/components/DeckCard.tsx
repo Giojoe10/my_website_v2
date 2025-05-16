@@ -9,6 +9,7 @@ interface DeckCardProps {
     deckName: string;
     archidektPage: string;
     ligamagicPage: string;
+    deckPrice: number;
 }
 
 export default async function DeckCard({
@@ -17,10 +18,11 @@ export default async function DeckCard({
     deckName,
     archidektPage,
     ligamagicPage,
+    deckPrice,
 }: DeckCardProps): Promise<JSX.Element> {
     return (
         <div className="inline-flex justify-center relative h-fit">
-            <div className="absolute overflow-hidden w-full h-full inline-flex justify-center">
+            <div className="absolute w-full h-full inline-flex justify-center">
                 <div
                     className="relative inline-flex h-[316px] w-[223px] justify-center z-10"
                     style={{ perspective: "1000px" }}>
@@ -41,7 +43,10 @@ export default async function DeckCard({
 
             <div className="bg-[#0c1019] border-2 border-[#252931] relative isolate flex flex-col items-center rounded-md p-4 pb-2 w-64 mt-18">
                 <div className="h-56" />
-                <p className="text-gray-400 text-xs mb-2 cursor-default">{deckName}</p>
+                <p className="text-gray-400 text-xs cursor-default">{deckName}</p>
+                <p className="text-primary-300 text-xs mb-2 cursor-default">
+                    R$ {deckPrice?.toString().replace(".", ",") || "???"}
+                </p>
                 <div className="w-full h-fit flex flex-col justify-center gap-1">
                     <Link href={archidektPage || "/"} className="w-full" target="_blank" rel="noopener noreferrer">
                         <button
